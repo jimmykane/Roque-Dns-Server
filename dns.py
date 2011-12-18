@@ -3,20 +3,30 @@ import socket
 import threading
 import thread
 import time
+global Domain_Name,sleeptime
+Domain_Name="www.google.com"#Your domain name
+sleeptime=5 #DNS refresh interval in seconds. This is usefull when you are not on static ip plan by your ISP
+global ip
+
+def resolve_dn():
+  dataip = socket.gethostbyname_ex(Domain_Name) 
+  ip = str(dataip[2][0]).strip("[] '")      
+  print  "Resolving Domain [%s]->[%s]" %( Domain_Name ,  ip  )
+  return ip
 
 def run_thread (threadname, sleeptime):
 
-  global threadcount, activethreads, threadlock, ip,dataip
-  threadlock.acquire() 
+  global threadcount, activethreads, threadlock
+  print "DnsResolver -> Setting Automated Refreshing -> [%ssec]"%sleeptime
   try:
-    while 1:
-      dataip = socket.gethostbyname_ex("www.google.com") # Edit the www.google.com to your domain name
-      ip = str(dataip[2]).strip("[] '")      
-      print  "Resolving Domain  -> ip[%s]" % ip  
+    while 1:      
       time.sleep(sleeptime) 
+      threadlock.acquire()
+      resolve_dn()
+      threadlock.release()
       
   except: 
-    print "%s error...." % (threadname)
+    print "%s error.... Ip changed to something unsual" % (threadname)
     activethreads = activethreads - 1
     threadlock.release()  
 
@@ -47,23 +57,24 @@ class DNSQuery:
 if __name__ == '__main__':  
   #If you want static IP for your server then modify and uncomment the line below
   #ip='192.168.1.1'
-  from threading import Timer
-  ip='0'
+  #from threading import Timer
+  print  "Staring Rogue Dns Server for [%s]" % Domain_Name 
+  ip=resolve_dn()  
   activethreads = 1
   threadlock = thread.allocate_lock()  
-  thread.start_new_thread(run_thread, ("DnsResolver", 50))  #50 coresponds to the refresh interval in seconds
-  print 'pyminifakeDNS:: dom.query. 60 IN A %s' % ip  
+  thread.start_new_thread(run_thread, ("DnsResolver", sleeptime)) 
   udps = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   udps.bind(('',53))
+  print "Staring Script...."
   try:
     while 1:
       data, addr = udps.recvfrom(1024)
       p=DNSQuery(data)
       udps.sendto(p.respuesta(ip), addr)
-      print 'Spoofing: %s -> %s' % (p.dominio, ip)
-
+      print 'Spoofing: [%s] -> [%s]' % (p.dominio, ip)
+      
   except  KeyboardInterrupt:
     udps.close()
-    print '\nClosing Connections -> [OK] '
+    print '\n\nUser Requested ctrl+c! \nClosing Connections -> [OK] '
 
   print 'All done Bye bye'
