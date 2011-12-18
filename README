@@ -36,7 +36,7 @@ Changes:
  -Added threading and improved performance
 
 Instructions:
-0. Edit Domain_Name and sleeptime variables to your needs
+0. Edit Domain_Name and sleeptime variables in dns.py to your needs. Description of the variables is available in dns.py file
 1. Run server: python dns.py
 3. Exit: ctrl+c
 
