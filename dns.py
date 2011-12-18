@@ -63,7 +63,7 @@ if __name__ == '__main__':
   ip='0'
   activethreads = 1
   threadlock = thread.allocate_lock()  
-  thread.start_new_thread(run_thread, ("DnsResolver", 5))  
+  thread.start_new_thread(run_thread, ("DnsResolver", 50))  #50 coresponds to the refresh interval in seconds
   print 'pyminifakeDNS:: dom.query. 60 IN A %s' % ip  
   udps = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   udps.bind(('',53))
