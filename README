@@ -35,14 +35,10 @@ Changes:
  -Added DNS resolving from ip to Domain Name for Dynamic IP support
  -Added threading and improved performance
 
-
-
-
-
+Instructions:
 0. Edit Domain_Name and sleeptime variables to your needs
 1. Run server: python dns.py
-
--Exit: ctrl+c
+3. Exit: ctrl+c
 
 
 
