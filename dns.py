@@ -4,8 +4,8 @@
 #--------------------------------------------------
 # Author: Dimitrios Kanellopoulos
 # Email: jimmykane9@gmail.com,
-# Twitter: @jimmykane9
-# Google+: gplus.to/jimmykane
+# Twitter: http://twitter.com/JimmyKane9
+# Google+: http://gplus.to/jimmykane
 # License: The GNU General Public License
 #------------------------------------------------------------------------------------------------------
 #----------
