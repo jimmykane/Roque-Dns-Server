@@ -5,7 +5,7 @@ import thread
 import time
 global Domain_Name,sleeptime
 Domain_Name="www.google.com"#Your domain name
-sleeptime=5 #DNS refresh interval in seconds. This is usefull when you are not on static ip plan by your ISP
+sleeptime=600 #DNS refresh interval in seconds. This is usefull when you are not on static ip plan by your ISP 600 = 10mins
 global ip
 
 def resolve_dn():
