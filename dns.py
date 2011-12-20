@@ -32,7 +32,7 @@ import thread
 import time
 global Domain_Name,sleeptime,spoofed_domain
 My_Domain_Name="www.mydomainname.com"#Your domain name
-spoofed_domain="www.in.gr"
+spoofed_domain="www.google.com"
 sleeptime=600 #DNS refresh interval in seconds. This is usefull when you are not on static ip plan by your ISP 600 = 10mins
 global ip
 
