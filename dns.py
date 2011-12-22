@@ -94,7 +94,7 @@ class DNSQuery:
       packet+='\xc0\x0c'                                             # Pointer to domain name
       packet+='\x00\x01\x00\x01\x00\x00\x00\x3c\x00\x04'             # Response type, ttl and resource data length -> 4 bytes
       packet+=str.join('',map(lambda x: chr(int(x)), self.ip.split('.'))) # 4bytes of IP
-      print 'Normal Request of: [%s] -> [%s]' % (self.dominio[:-1],resolve_dn(self.dominio[:-1]))
+      print 'Normal Request of: [%s] -> [%s]' % (self.dominio[:-1],self.ip)
     return packet
    
 
@@ -112,8 +112,7 @@ if __name__ == '__main__':
     while 1:
       data, addr = udps.recvfrom(1024)
       p=DNSQuery(data)
-      udps.sendto(p.respuesta(ip), addr)
-      
+      udps.sendto(p.respuesta(ip), addr)      
       
   except  KeyboardInterrupt:
     udps.close()
