@@ -31,16 +31,20 @@ import threading
 import thread
 import time
 global Domain_Name,sleeptime,spoofed_domain
-My_Domain_Name="www.mydomainname.com"#Your domain name
+My_Domain_Name="www.mydomainname.com"#Your domain name or IP
 spoofed_domain="www.google.com"
 sleeptime=600 #DNS refresh interval in seconds. This is usefull when you are not on static ip plan by your ISP 600 = 10mins
 global ip
 
 def resolve_dn(domain_name):
-  dataip = socket.gethostbyname_ex(domain_name) 
-  ip = str(dataip[2][0]).strip("[] '")      
-  print  "Resolving Domain [%s]->[%s]" %( domain_name ,  ip  )
-  return ip
+  try:
+    dataip = socket.gethostbyname_ex(domain_name) 
+    ip = str(dataip[2][0]).strip("[] '")      
+    print  "Resolving Domain [%s]->[%s]" %( domain_name ,  ip  )
+    return ip
+  except socket.gaierror: 
+    print "Error! Resolving Domain [%s]!" %( domain_name )
+    return "1.1.1.1"
 
 def run_thread (threadname, sleeptime):
 
@@ -95,11 +99,9 @@ class DNSQuery:
    
 
 if __name__ == '__main__':  
-  #If you want static IP for your server then modify and uncomment the line below
-  #ip='192.168.1.1'
-  #from threading import Timer
+  
   print  "Staring Rogue Dns Server for [%s]" % My_Domain_Name
-  ip=resolve_dn(My_Domain_Name)  #modify here for static ip
+  ip=resolve_dn(My_Domain_Name)
   activethreads = 1
   threadlock = thread.allocate_lock()  
   thread.start_new_thread(run_thread, ("DnsResolver", sleeptime)) 
